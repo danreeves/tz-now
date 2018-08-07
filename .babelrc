@@ -1,0 +1,6 @@
+{
+  "plugins": [
+    "emotion",
+    ["transform-class-properties", { "spec": true }]
+  ]
+}
