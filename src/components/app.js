@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 
 const Body = styled.table`
   font-family: monospace;
-  border-collapse: collapse;
+  border: 1px solid black;
   margin-left: auto;
   margin-right: auto;
 `;
@@ -12,9 +12,18 @@ const Body = styled.table`
 const Row = styled.tr``;
 
 const Col = styled.td`
-  border: 1px solid black;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
   padding: 0.5rem;
   ${({ now }) => now && "background: yellow;"};
+  ${({ eod }) =>
+    eod &&
+    "border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-right: 1px solid black;"}
+  ${({ sod }) =>
+    sod &&
+    "border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-left: 1px solid black;"}
+  ${({ box }) => box && "border: 1px solid black;"}
+  ${({ cap }) => cap && `border-${cap}: 1px solid black;`}
 `;
 
 const P = styled.p`
@@ -83,11 +92,11 @@ export default class App extends React.Component {
             {timezones.map(zoneName => {
               return (
                 <Row key={zoneName}>
-                  <Col>
+                  <Col box>
                     {zoneName === now.zoneName ? "⌂ " : ""}
                     {zoneName}
                   </Col>
-                  <Col>
+                  <Col box>
                     <P>
                       {now
                         .setZone(zoneName)
@@ -97,10 +106,25 @@ export default class App extends React.Component {
                       {now.setZone(zoneName).toLocaleString(DateTime.DATE_HUGE)}
                     </P>
                   </Col>
-                  {times.map(time => {
-                    const timeString = time.setZone(zoneName).toFormat("ha");
+                  {times.map((time, i) => {
+                    const localTime = time.setZone(zoneName);
+                    const timeString = localTime.toFormat("ha");
+                    if (zoneName !== "America/New_York")
+                      console.log({ localTime });
                     return (
-                      <Col key={time.hour} now={time === now}>
+                      <Col
+                        key={time.hour}
+                        now={time === now}
+                        eod={localTime.hour === 0}
+                        sod={localTime.hour === 1}
+                        cap={
+                          i === 0
+                            ? "left"
+                            : i === times.length - 1
+                              ? "right"
+                              : false
+                        }
+                      >
                         <Padded>{timeString}</Padded>
                       </Col>
                     );
