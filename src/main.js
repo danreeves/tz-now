@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { injectGlobal } from "emotion";
-import App from "./components/app";
+import { App } from "./components/app";
 
 /*! normalize.css v8.0.0 | MIT License | github.com/necolas/normalize.css */
 injectGlobal`
