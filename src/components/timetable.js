@@ -45,17 +45,6 @@ export class Timetable extends React.Component {
   offsetBefore = 1;
   offsetAfter = 23;
 
-  componentDidMount() {
-    this.interval = setInterval(() => {
-      const now = DateTime.local();
-      this.setState({ now });
-    }, 1000);
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.interval);
-  }
-
   setHovered = time => {
     this.setState({ highlighted: time });
   };
