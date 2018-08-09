@@ -4,43 +4,40 @@ import { DateTime } from "luxon";
 
 const Body = styled.table`
   font-family: monospace;
-  border: 1px solid black;
+  border: 1px solid darkgrey;
   margin-left: auto;
   margin-right: auto;
+  user-select: none;
 `;
 
-const Row = styled.tr``;
+const Row = styled.tr`
+  &:hover {
+    color: white;
+    border-color: white;
+  }
+`;
 
 const Col = styled.td`
-  border-top: 1px solid black;
-  border-bottom: 1px solid black;
+  border-top: 1px solid darkgrey;
+  border-bottom: 1px solid darkgrey;
   padding: 0.5rem;
-  ${({ now }) => now && "background: yellow;"};
+  text-align: center;
+  ${({ now }) => now && "background: deeppink; color: black;"};
   ${({ eod }) =>
     eod &&
-    "border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-right: 1px solid black;"}
+    "border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-right: 1px solid darkgrey;"}
   ${({ sod }) =>
     sod &&
-    "border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-left: 1px solid black;"}
-  ${({ box }) => box && "border: 1px solid black;"}
-  ${({ cap }) => cap && `border-${cap}: 1px solid black;`}
+    "border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-left: 1px solid darkgrey;"}
+  ${({ box }) => box && "border: 1px solid darkgrey;"}
+  ${({ cap }) => cap && `border-${cap}: 1px solid darkgrey;`}
+  ${({ highlight }) => highlight && "color: white; border-color: white;"}
 `;
 
 const P = styled.p`
   margin: 0;
   margin-bottom: 0.25rem;
 `;
-
-function Padded({ children }) {
-  return children.length < 4 ? (
-    <React.Fragment>
-      &nbsp;
-      {children}
-    </React.Fragment>
-  ) : (
-    children
-  );
-}
 
 export default class App extends React.Component {
   constructor(props) {
@@ -54,11 +51,11 @@ export default class App extends React.Component {
       "America/Los_Angeles",
       "Asia/Tokyo"
     ];
-    this.state = { now, timezones };
+    this.state = { now, timezones, highlighted: null };
   }
 
-  offsetBefore = 5;
-  offsetAfter = 10;
+  offsetBefore = 1;
+  offsetAfter = 23;
 
   componentDidMount() {
     this.interval = setInterval(() => {
@@ -71,8 +68,12 @@ export default class App extends React.Component {
     clearInterval(this.interval);
   }
 
+  setHovered = time => {
+    this.setState({ highlighted: time });
+  };
+
   render() {
-    const { timezones, now } = this.state;
+    const { timezones, now, highlighted } = this.state;
     const hoursBefore = Array.from({ length: this.offsetBefore })
       .map((v, i) => i + 1)
       .reverse()
@@ -83,11 +84,12 @@ export default class App extends React.Component {
     const times = [...hoursBefore, now, ...hoursAfter];
 
     return (
-      <div>
-        <h1>Hello, planet!</h1>
-        <P>WIP</P>
-        <hr />
-        <Body>
+      <div style={{ marginTop: "1rem" }}>
+        <Body
+          onMouseLeave={() => {
+            this.setHovered(null);
+          }}
+        >
           <tbody>
             {timezones.map(zoneName => {
               return (
@@ -108,24 +110,33 @@ export default class App extends React.Component {
                   </Col>
                   {times.map((time, i) => {
                     const localTime = time.setZone(zoneName);
-                    const timeString = localTime.toFormat("ha");
-                    if (zoneName !== "America/New_York")
-                      console.log({ localTime });
+                    const isNow = time === now;
+                    const isHighlighted =
+                      highlighted && highlighted.hasSame(time, "hour");
+                    const isEod = localTime.hour === 23;
+                    const isSod = localTime.hour === 0;
+                    const cellCap =
+                      i === 0
+                        ? "left"
+                        : i === times.length - 1
+                          ? "right"
+                          : false;
+                    const timeString = isSod
+                      ? localTime.toFormat("EEE d")
+                      : localTime.toFormat("ha");
                     return (
                       <Col
-                        key={time.hour}
-                        now={time === now}
-                        eod={localTime.hour === 0}
-                        sod={localTime.hour === 1}
-                        cap={
-                          i === 0
-                            ? "left"
-                            : i === times.length - 1
-                              ? "right"
-                              : false
-                        }
+                        key={`${time.weekday}-${time.hour}`}
+                        now={isNow}
+                        eod={isEod}
+                        sod={isSod}
+                        cap={cellCap}
+                        highlight={isHighlighted}
+                        onMouseEnter={() => {
+                          this.setHovered(time);
+                        }}
                       >
-                        <Padded>{timeString}</Padded>
+                        {timeString}
                       </Col>
                     );
                   })}

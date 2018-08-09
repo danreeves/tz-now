@@ -44,6 +44,11 @@ injectGlobal`
   *, *:before, *:after {
     box-sizing: border-box;
   }
+
+  html, body, #app {
+    background: black;
+    color: darkgrey;
+  }
 `;
 
 ReactDOM.render(<App />, document.querySelector("#app"));
