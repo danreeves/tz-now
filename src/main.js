@@ -48,6 +48,7 @@ injectGlobal`
   html, body, #app {
     background: black;
     color: darkgrey;
+    font-family: monospace;
   }
 `;
 

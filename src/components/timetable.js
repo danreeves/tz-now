@@ -3,10 +3,7 @@ import styled from "react-emotion";
 import { DateTime } from "luxon";
 
 const Table = styled.table`
-  font-family: monospace;
   border: 1px solid darkgrey;
-  margin-left: auto;
-  margin-right: auto;
   user-select: none;
 `;
 
@@ -94,9 +91,12 @@ export class Timetable extends React.Component {
                   const isSod = localTime.hour === 0;
                   const cellCap =
                     i === 0 ? "left" : i === times.length - 1 ? "right" : false;
-                  const timeString = isSod
-                    ? localTime.toFormat("EEE d")
-                    : localTime.toFormat("ha");
+                  const cellTop = isSod
+                    ? localTime.toFormat(`EEE`)
+                    : localTime.toFormat(`h`);
+                  const cellBottom = isSod
+                    ? localTime.toFormat(`d`)
+                    : localTime.toFormat(`a`);
                   return (
                     <Cell
                       key={`${time.weekday}-${time.hour}`}
@@ -109,7 +109,8 @@ export class Timetable extends React.Component {
                         this.setHovered(time);
                       }}
                     >
-                      {timeString}
+                      <div>{cellTop}</div>
+                      <div>{cellBottom}</div>
                     </Cell>
                   );
                 })}
