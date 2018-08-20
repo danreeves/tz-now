@@ -86,7 +86,9 @@ export class Select extends React.Component {
 
   renderInput(props) {
     const { ref, ...rest } = props;
-    return <Input {...rest} innerRef={ref} />;
+    return (
+      <Input {...rest} innerRef={ref} placeholder="Search for a timezone..." />
+    );
   }
 
   render() {
