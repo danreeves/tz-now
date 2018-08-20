@@ -71,37 +71,6 @@ export class App extends React.Component {
           <div>
             <Select options={tzIds} onSelect={this.addTimezone} />
           </div>
-          <div>
-            <Input
-              placeholder="Add a timezone..."
-              autocomplete
-              list="tzids"
-              type="text"
-              onKeyDown={e => {
-                // Escape clears the input
-                if (e.key === "Escape") {
-                  e.target.value = "";
-                  e.target.blur();
-                }
-              }}
-              onBlur={e => {
-                // Clear the input on blur
-                e.target.value = "";
-              }}
-              onChange={e => {
-                const val = e.target.value;
-                if (tzIds.includes(val)) {
-                  this.addTimezone(e.target.value);
-                  e.target.value = "";
-                }
-              }}
-            />
-            <datalist id="tzids">
-              {tzIds.map(id => (
-                <option key={id} value={id} />
-              ))}
-            </datalist>
-          </div>
           <Timetable now={now} timezones={timezones} />
         </Body>
       </Page>

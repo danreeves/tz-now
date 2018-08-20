@@ -1,4 +1,5 @@
 import React from "react";
+import Autocomplete from "react-autocomplete";
 import styled from "react-emotion";
 import memoize from "memoize-one";
 
@@ -48,130 +49,63 @@ function filterOptions(filter, options) {
   return options.filter(option => option.toLowerCase().search(regex) > -1);
 }
 
-const memoizedFilter = memoize(filterOptions);
-
-export class Select extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.input = React.createRef();
-    this.state = {
-      value: "",
-      selected: "",
-      options: props.options,
-      filteredOptions: []
-    };
-  }
-
-  static getDerivedStateFromProps(props, state) {
-    if (props.options !== state.options) {
-      return {
-        options: props.options,
-        filteredOptions: memoizedFilter(state.value, props.options)
-      };
-    }
-    return null;
-  }
+export class Select extends React.Component {
+  state = { value: "" };
 
   onChange = e => {
-    const value = e.target.value;
-    this.setState(prevState => ({
-      value,
-      selected: "",
-      filteredOptions: memoizedFilter(value, prevState.options)
-    }));
+    this.setState({ value: e.target.value });
   };
 
-  onBlur = () => {
+  onSelect = value => {
+    const { onSelect } = this.props;
     this.setState({ value: "" });
-  };
-
-  onKeyDown = e => {
-    switch (e.key) {
-      case "Escape":
-        e.target.blur();
-        this.setState({ highlighted: -1 });
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        this.setState(prevState => {
-          const selected = prevState.selected
-            ? prevState.filteredOptions[
-                prevState.filteredOptions.indexOf(prevState.selected) - 1
-              ]
-            : prevState.filteredOptions[prevState.filteredOptions.length - 1];
-          return {
-            selected
-          };
-        });
-        break;
-      case "ArrowDown":
-        e.preventDefault();
-        this.setState(prevState => {
-          const selected = prevState.selected
-            ? prevState.filteredOptions[
-                prevState.filteredOptions.indexOf(prevState.selected) + 1
-              ]
-            : prevState.filteredOptions[0];
-          return {
-            selected
-          };
-        });
-        break;
-      case "Enter":
-        e.preventDefault();
-        const { selected } = this.state;
-        if (selected) {
-          this.selectOption(selected);
-        }
-        break;
-      default:
-        break;
+    if (onSelect) {
+      onSelect(value);
     }
   };
 
-  onHoverItem = option => () => {
-    this.setState({
-      selected: option
-    });
-  };
+  getItemValue(item) {
+    return item;
+  }
 
-  selectOption = option => {
-    this.setState({
-      value: "",
-      selected: ""
-    });
-    this.props.onSelect && this.props.onSelect(option);
-  };
+  renderItem(item, isHighlighted) {
+    return (
+      <Item key={item} highlight={!!isHighlighted}>
+        {item}
+      </Item>
+    );
+  }
+
+  shouldItemRender(item, value) {
+    return item.toLowerCase().includes(value.toLowerCase());
+  }
+
+  renderMenu(items) {
+    return <Menu children={items} />;
+  }
+
+  renderInput(props) {
+    const { ref, ...rest } = props;
+    return <Input {...rest} innerRef={ref} />;
+  }
 
   render() {
-    const { value, selected, filteredOptions } = this.state;
-
+    const { options, onSelect } = this.props;
+    const { value } = this.state;
     return (
-      <Wrapper>
-        <Input
-          placeholder="Add a timezone..."
-          type="text"
-          ref={this.input}
-          value={value}
-          onChange={this.onChange}
-          onBlur={this.onBlur}
-          onKeyDown={this.onKeyDown}
-        />
-        {value && (
-          <Menu>
-            {filteredOptions.map(option => (
-              <Item
-                key={option}
-                highlight={option === selected}
-                onMouseEnter={this.onHoverItem(option)}
-                onClick={() => this.selectOption(option)}
-              >
-                {option}
-              </Item>
-            ))}
-          </Menu>
-        )}
-      </Wrapper>
+      <Autocomplete
+        wrapperStyle={{ position: "relative", display: "inline-block" }}
+        autoHighlight={true}
+        getItemValue={this.getItemValue}
+        items={options}
+        onChange={this.onChange}
+        onSelect={this.onSelect}
+        renderItem={this.renderItem}
+        renderMenu={this.renderMenu}
+        renderInput={this.renderInput}
+        shouldItemRender={this.shouldItemRender}
+        value={value}
+      />
     );
   }
 }
