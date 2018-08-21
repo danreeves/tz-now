@@ -22,7 +22,7 @@ const Menu = styled.div`
   left: 0;
   min-width: 100%;
   max-height: 200px;
-  overflow: scroll;
+  overflow-y: scroll;
   background: black;
   border: 1px solid lightgrey;
 `;
