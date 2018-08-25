@@ -25,6 +25,7 @@ const Menu = styled.div`
   overflow-y: scroll;
   background: black;
   border: 1px solid lightgrey;
+  z-index: 10;
 `;
 
 const Item = styled.div`

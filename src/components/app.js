@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "react-emotion";
 import { DateTime } from "luxon";
+import memoize from "memoize-one";
 import { get, set } from "../utils/localstorage";
 import { unique } from "../utils/unique";
 import { Select } from "./select";
@@ -17,6 +18,10 @@ const Body = styled.div`
   flex-direction: column;
 `;
 
+const Header = styled.header`
+  position: relative;
+`;
+
 const Input = styled.input`
   border: 1px solid lightgrey;
   background: transparent;
@@ -25,6 +30,12 @@ const Input = styled.input`
   margin-left: 0;
   color: lightgrey;
 `;
+
+const tzIdFilter = memoize((timezones, localZone) => {
+  return id => {
+    return !timezones.includes(id) && id !== localZone;
+  };
+});
 
 export class App extends React.Component {
   constructor() {
@@ -43,7 +54,7 @@ export class App extends React.Component {
     // Get timezone IANA IDs
     import("../data/tz-ids.json").then(tzIds =>
       this.setState(prevState => ({
-        tzIds: tzIds.filter(this.tzIdFilter(prevState.timezones, prevState.now))
+        tzIds
       }))
     );
 
@@ -59,40 +70,48 @@ export class App extends React.Component {
     clearInterval(this.interval);
   }
 
-  tzIdFilter(timezones, now) {
-    return id => {
-      return !timezones.includes(id) && id !== now.zoneName;
-    };
-  }
-
   addTimezone = timezone => {
     this.setState(prevState => {
       const newTimezones = unique([...prevState.timezones, timezone]);
-      const newTzIds = prevState.tzIds.filter(
-        this.tzIdFilter(newTimezones, prevState.now)
-      );
 
       // Persist to ls
       set("timezones", newTimezones);
 
       // Update component state
       return {
-        tzIds: newTzIds,
         timezones: newTimezones
       };
+    });
+  };
+
+  removeTimezone = timezone => {
+    this.setState(prevState => {
+      const newTimezones = prevState.timezones.filter(id => id !== timezone);
+
+      // Persist to ls
+      set("timezones", newTimezones);
+
+      // Update component state
+      return { timezones: newTimezones };
     });
   };
 
   render() {
     const { now, timezones, tzIds } = this.state;
     const activeTimezones = unique([now.zoneName, ...timezones]);
+    const activeTzIds = tzIds.filter(tzIdFilter(activeTimezones, now.zoneName));
     return (
       <Page>
         <Body>
-          <div>
-            <Select options={tzIds} onSelect={this.addTimezone} />
-          </div>
-          <Timetable now={now} timezones={activeTimezones} />
+          <Header>
+            <Select options={activeTzIds} onSelect={this.addTimezone} />
+          </Header>
+
+          <Timetable
+            now={now}
+            timezones={activeTimezones}
+            removeTimezone={this.removeTimezone}
+          />
         </Body>
       </Page>
     );

@@ -7,14 +7,30 @@ const Table = styled.table`
   user-select: none;
 `;
 
+const ActionBox = styled.div`
+  position: absolute;
+  height: 100%;
+  top: 0;
+  left: -2rem;
+  padding-right: 2rem;
+  display: none;
+  &:hover {
+    display: block;
+  }
+`;
+
 const Row = styled.tr`
   &:hover {
     color: white;
     border-color: white;
+    & ${ActionBox} {
+      display: block;
+    }
   }
 `;
 
 const Cell = styled.td`
+  position: relative;
   border-top: 1px solid darkgrey;
   border-bottom: 1px solid darkgrey;
   padding: 0.5rem;
@@ -47,7 +63,7 @@ export class Timetable extends React.Component {
   };
 
   render() {
-    const { now, timezones } = this.props;
+    const { now, timezones, removeTimezone } = this.props;
     const { highlighted } = this.state;
     const hoursBefore = Array.from({ length: this.offsetBefore })
       .map((v, i) => i + 1)
@@ -71,6 +87,13 @@ export class Timetable extends React.Component {
                 <Cell box>
                   {zoneName === now.zoneName ? "⌂ " : ""}
                   {zoneName}
+                  {zoneName !== now.zoneName && (
+                    <ActionBox>
+                      <button onClick={() => removeTimezone(zoneName)}>
+                        &times;
+                      </button>
+                    </ActionBox>
+                  )}
                 </Cell>
                 <Cell box>
                   <P>
