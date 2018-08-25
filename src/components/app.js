@@ -85,13 +85,14 @@ export class App extends React.Component {
 
   render() {
     const { now, timezones, tzIds } = this.state;
+    const activeTimezones = unique([now.zoneName, ...timezones]);
     return (
       <Page>
         <Body>
           <div>
             <Select options={tzIds} onSelect={this.addTimezone} />
           </div>
-          <Timetable now={now} timezones={[now.zoneName, ...timezones]} />
+          <Timetable now={now} timezones={activeTimezones} />
         </Body>
       </Page>
     );
