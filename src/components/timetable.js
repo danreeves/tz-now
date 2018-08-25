@@ -13,9 +13,9 @@ const ActionBox = styled.div`
   top: 0;
   left: -2rem;
   padding-right: 2rem;
-  display: none;
+  opacity: 0;
   &:hover {
-    display: block;
+    opacity: 1;
   }
 `;
 
@@ -24,7 +24,7 @@ const Row = styled.tr`
     color: white;
     border-color: white;
     & ${ActionBox} {
-      display: block;
+      opacity: 1;
     }
   }
 `;
@@ -87,13 +87,11 @@ export class Timetable extends React.Component {
                 <Cell box>
                   {zoneName === now.zoneName ? "⌂ " : ""}
                   {zoneName}
-                  {zoneName !== now.zoneName && (
-                    <ActionBox>
-                      <button onClick={() => removeTimezone(zoneName)}>
-                        &times;
-                      </button>
-                    </ActionBox>
-                  )}
+                  <ActionBox>
+                    <button onClick={() => removeTimezone(zoneName)}>
+                      &times;
+                    </button>
+                  </ActionBox>
                 </Cell>
                 <Cell box>
                   <P>

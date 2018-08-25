@@ -6,6 +6,7 @@ import { get, set } from "../utils/localstorage";
 import { unique } from "../utils/unique";
 import { Select } from "./select";
 import { Timetable } from "./timetable";
+import { AddLocalTime } from "./add-local-time";
 
 const Page = styled.div`
   display: flex;
@@ -98,18 +99,22 @@ export class App extends React.Component {
 
   render() {
     const { now, timezones, tzIds } = this.state;
-    const activeTimezones = unique([now.zoneName, ...timezones]);
-    const activeTzIds = tzIds.filter(tzIdFilter(activeTimezones, now.zoneName));
+    const activeTzIds = tzIds.filter(tzIdFilter(timezones, now.zoneName));
     return (
       <Page>
         <Body>
           <Header>
             <Select options={activeTzIds} onSelect={this.addTimezone} />
+            <AddLocalTime
+              now={now}
+              timezones={timezones}
+              addTimezone={this.addTimezone}
+            />
           </Header>
 
           <Timetable
             now={now}
-            timezones={activeTimezones}
+            timezones={timezones}
             removeTimezone={this.removeTimezone}
           />
         </Body>
