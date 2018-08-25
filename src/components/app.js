@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "react-emotion";
 import { DateTime } from "luxon";
+import { get, set } from "../utils/localstorage";
 import { unique } from "../utils/unique";
 import { Select } from "./select";
 import { Timetable } from "./timetable";
@@ -29,8 +30,7 @@ export class App extends React.Component {
   constructor() {
     super();
     const now = DateTime.local();
-    const timezones = [now.zoneName];
-    this.state = { now, timezones, tzIds: [] };
+    this.state = { now, timezones: [], tzIds: [] };
   }
 
   componentDidMount() {
@@ -42,10 +42,16 @@ export class App extends React.Component {
 
     // Get timezone IANA IDs
     import("../data/tz-ids.json").then(tzIds =>
-      this.setState({
-        tzIds: tzIds.filter(id => !this.state.timezones.includes(id))
-      })
+      this.setState(prevState => ({
+        tzIds: tzIds.filter(this.tzIdFilter(prevState.timezones, prevState.now))
+      }))
     );
+
+    // Get persisted data from localStorage
+    const persistedTimezones = get("timezones");
+    if (persistedTimezones) {
+      this.setState({ timezones: persistedTimezones });
+    }
   }
 
   componentWillUnmount() {
@@ -53,11 +59,25 @@ export class App extends React.Component {
     clearInterval(this.interval);
   }
 
+  tzIdFilter(timezones, now) {
+    return id => {
+      return !timezones.includes(id) && id !== now.zoneName;
+    };
+  }
+
   addTimezone = timezone => {
     this.setState(prevState => {
       const newTimezones = unique([...prevState.timezones, timezone]);
+      const newTzIds = prevState.tzIds.filter(
+        this.tzIdFilter(newTimezones, prevState.now)
+      );
+
+      // Persist to ls
+      set("timezones", newTimezones);
+
+      // Update component state
       return {
-        tzIds: prevState.tzIds.filter(id => !newTimezones.includes(id)),
+        tzIds: newTzIds,
         timezones: newTimezones
       };
     });
@@ -71,7 +91,7 @@ export class App extends React.Component {
           <div>
             <Select options={tzIds} onSelect={this.addTimezone} />
           </div>
-          <Timetable now={now} timezones={timezones} />
+          <Timetable now={now} timezones={[now.zoneName, ...timezones]} />
         </Body>
       </Page>
     );
