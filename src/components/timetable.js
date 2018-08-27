@@ -9,9 +9,11 @@ const Table = styled.table`
 
 const ActionBox = styled.div`
   position: absolute;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   top: 0;
-  left: -2rem;
+  left: -5rem;
   padding-right: 2rem;
   opacity: 0;
   &:hover {
@@ -52,6 +54,16 @@ const P = styled.p`
   margin-bottom: 0.25rem;
 `;
 
+const Btn = styled.button`
+  background: none;
+  text-align: right;
+  border: none;
+  color: darkgrey;
+  font-size: 1rem;
+  line-height: 1rem;
+  padding: 0.25rem;
+`;
+
 export class Timetable extends React.Component {
   state = { highlighted: null };
 
@@ -63,7 +75,7 @@ export class Timetable extends React.Component {
   };
 
   render() {
-    const { now, timezones, removeTimezone } = this.props;
+    const { now, timezones, removeTimezone, moveUp, moveDown } = this.props;
     const { highlighted } = this.state;
     const hoursBefore = Array.from({ length: this.offsetBefore })
       .map((v, i) => i + 1)
@@ -88,9 +100,9 @@ export class Timetable extends React.Component {
                   {zoneName === now.zoneName ? "⌂ " : ""}
                   {zoneName}
                   <ActionBox>
-                    <button onClick={() => removeTimezone(zoneName)}>
-                      &times;
-                    </button>
+                    <Btn onClick={() => moveUp(zoneName)}>Up</Btn>
+                    <Btn onClick={() => moveDown(zoneName)}>Down</Btn>
+                    <Btn onClick={() => removeTimezone(zoneName)}>Remove</Btn>
                   </ActionBox>
                 </Cell>
                 <Cell box>

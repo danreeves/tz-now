@@ -97,6 +97,12 @@ export class App extends React.Component {
     });
   };
 
+  moveTimezone = (timezone, change) => {
+    this.setState(prevState => {
+      const timezones = [...prevState.timezones];
+    });
+  };
+
   render() {
     const { now, timezones, tzIds } = this.state;
     const activeTzIds = tzIds.filter(tzIdFilter(timezones, now.zoneName));
@@ -116,6 +122,8 @@ export class App extends React.Component {
             now={now}
             timezones={timezones}
             removeTimezone={this.removeTimezone}
+            moveUp={this.moveTimezoneUp}
+            moveDown={this.moveTimezoneDown}
           />
         </Body>
       </Page>
