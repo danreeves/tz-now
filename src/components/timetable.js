@@ -62,6 +62,9 @@ const Btn = styled.button`
   font-size: 1rem;
   line-height: 1rem;
   padding: 0.25rem;
+  &:hover {
+    color: white;
+  }
 `;
 
 export class Timetable extends React.Component {
