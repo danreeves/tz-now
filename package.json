@@ -5,7 +5,8 @@
   "scripts": {
     "start": "parcel src/index.html",
     "build": "rm -rf ./dist && parcel build src/index.html && cp ./now.json ./dist/now.json",
-    "deploy": "now dist && now alias",
+    "predeploy": "npm run build",
+    "deploy": "now dist && now alias && now-clear -n tz",
     "precommit": "pretty-quick --staged"
   },
   "keywords": [
@@ -30,6 +31,7 @@
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "get-tz-ids": "^1.0.0",
+    "now-clear": "0.0.3",
     "parcel-bundler": "^1.9.7",
     "prettier": "^1.14.0",
     "pretty-quick": "^1.6.0"
