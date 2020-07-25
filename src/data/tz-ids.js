@@ -1,4 +1,4 @@
-[
+export const list = [
   "Africa/Abidjan",
   "Africa/Accra",
   "Africa/Addis_Ababa",
@@ -422,5 +422,5 @@
   "Pacific/Tarawa",
   "Pacific/Tongatapu",
   "Pacific/Wake",
-  "Pacific/Wallis"
-]
+  "Pacific/Wallis",
+];

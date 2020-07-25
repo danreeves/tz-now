@@ -1,5 +1,5 @@
 import React from "react";
-import styled from "react-emotion";
+import styled from "@emotion/styled";
 import { DateTime } from "luxon";
 
 const Table = styled.table`
@@ -68,35 +68,36 @@ const Btn = styled.button`
 `;
 
 export class Timetable extends React.Component {
-  state = { highlighted: null };
-
-  offsetBefore = 1;
-  offsetAfter = 23;
-
-  setHovered = time => {
-    this.setState({ highlighted: time });
-  };
+  constructor() {
+    super();
+    this.state = { highlighted: null };
+    this.offsetBefore = 1;
+    this.offsetAfter = 23;
+  }
 
   render() {
+    const setHovered = (time) => {
+      this.setState({ highlighted: time });
+    };
     const { now, timezones, removeTimezone, moveUp, moveDown } = this.props;
     const { highlighted } = this.state;
     const hoursBefore = Array.from({ length: this.offsetBefore })
       .map((v, i) => i + 1)
       .reverse()
-      .map(v => now.minus({ hours: v }));
+      .map((v) => now.minus({ hours: v }));
     const hoursAfter = Array.from({ length: this.offsetAfter })
       .map((v, i) => i + 1)
-      .map(v => now.plus({ hours: v }));
+      .map((v) => now.plus({ hours: v }));
     const times = [...hoursBefore, now, ...hoursAfter];
 
     return (
       <Table
         onMouseLeave={() => {
-          this.setHovered(null);
+          setHovered(null);
         }}
       >
         <tbody>
-          {timezones.map(zoneName => {
+          {timezones.map((zoneName) => {
             return (
               <Row key={zoneName}>
                 <Cell box>
@@ -142,7 +143,7 @@ export class Timetable extends React.Component {
                       cap={cellCap}
                       highlight={isHighlighted}
                       onMouseEnter={() => {
-                        this.setHovered(time);
+                        setHovered(time);
                       }}
                     >
                       <div>{cellTop}</div>

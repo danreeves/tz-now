@@ -1,10 +1,10 @@
 import React from "react";
-import styled from "react-emotion";
+import styled from "@emotion/styled";
 import { DateTime } from "luxon";
 import memoize from "memoize-one";
+import Select from "react-select";
 import { get, set } from "../utils/localstorage";
 import { unique } from "../utils/unique";
-import { Select } from "./select";
 import { Timetable } from "./timetable";
 import { AddLocalTime } from "./add-local-time";
 
@@ -33,7 +33,7 @@ const Input = styled.input`
 `;
 
 const tzIdFilter = memoize((timezones, localZone) => {
-  return id => {
+  return (id) => {
     return !timezones.includes(id) && id !== localZone;
   };
 });
@@ -53,9 +53,9 @@ export class App extends React.Component {
     }, 1000);
 
     // Get timezone IANA IDs
-    import("../data/tz-ids.json").then(tzIds =>
-      this.setState(prevState => ({
-        tzIds
+    import("../data/tz-ids.js").then((module) =>
+      this.setState((prevState) => ({
+        tzIds: module.list,
       }))
     );
 
@@ -66,85 +66,151 @@ export class App extends React.Component {
     }
   }
 
-  componentWillUnmount() {
+  componentDidUnmount() {
     // Kill the internal clock
     clearInterval(this.interval);
   }
 
-  addTimezone = timezone => {
-    this.setState(prevState => {
-      const newTimezones = unique([...prevState.timezones, timezone]);
-
-      // Persist to ls
-      set("timezones", newTimezones);
-
-      // Update component state
-      return {
-        timezones: newTimezones
-      };
-    });
-  };
-
-  removeTimezone = timezone => {
-    this.setState(prevState => {
-      const newTimezones = prevState.timezones.filter(id => id !== timezone);
-
-      // Persist to ls
-      set("timezones", newTimezones);
-
-      // Update component state
-      return { timezones: newTimezones };
-    });
-  };
-
-  moveTimezone = (timezone, direction) => {
-	const index = this.state.timezones.indexOf(timezone)
-	const before = this.state.timezones.slice(0, index)
-	const after = this.state.timezones.slice(index + 1, this.state.timezones.length)
-
-	if (direction === "up") {
-	  const displaced = before.pop()
-	  this.setState({
-		timezones: [...before, timezone, displaced, ...after]
-	  })
-	}
-	if (directions === "down") {
-	  const displaced = after.shift()
-	  this.setState({
-		timezones: [...before, displaced, timezone, ...after]
-	  })
-	}
-  };
-
-  moveTimezoneUp = (timezone) => {
-	this.moveTimezone(timezone, "up")
-  }
-
-  moveTimezoneDown = (timezone) => {
-	this.moveTimezone(timezone, "down")
-  }
-
   render() {
+    const addTimezone = ({ value: timezone } = {}) => {
+      this.setState((prevState) => {
+        const newTimezones = unique([...prevState.timezones, timezone]);
+
+        // Persist to ls
+        set("timezones", newTimezones);
+
+        // Update component state
+        return {
+          timezones: newTimezones,
+        };
+      });
+    };
+
+    const removeTimezone = (timezone) => {
+      this.setState((prevState) => {
+        const newTimezones = prevState.timezones.filter(
+          (id) => id !== timezone
+        );
+
+        // Persist to ls
+        set("timezones", newTimezones);
+
+        // Update component state
+        return { timezones: newTimezones };
+      });
+    };
+
+    const moveTimezone = (timezone, direction) => {
+      const index = this.state.timezones.indexOf(timezone);
+      const before = this.state.timezones.slice(0, index);
+      const after = this.state.timezones.slice(
+        index + 1,
+        this.state.timezones.length
+      );
+
+      if (direction === "up") {
+        const displaced = before.pop();
+        this.setState({
+          timezones: [...before, timezone, displaced, ...after],
+        });
+      }
+      if (direction === "down") {
+        const displaced = after.shift();
+        this.setState({
+          timezones: [...before, displaced, timezone, ...after],
+        });
+      }
+    };
+
+    const moveTimezoneUp = (timezone) => {
+      moveTimezone(timezone, "up");
+    };
+
+    const moveTimezoneDown = (timezone) => {
+      moveTimezone(timezone, "down");
+    };
     const { now, timezones, tzIds } = this.state;
-    const activeTzIds = tzIds.filter(tzIdFilter(timezones, now.zoneName));
+    const activeTzIds = tzIds
+      .filter((id) => !timezones.includes(id) && now.zoneName !== id)
+      .map((id) => ({
+        value: id,
+        label: id,
+      }));
     return (
       <Page>
         <Body>
           <Header>
-            <Select options={activeTzIds} onSelect={this.addTimezone} />
+            <Select
+              placeholder="Select a timezone..."
+              options={activeTzIds}
+              onChange={addTimezone}
+              value={null}
+              styles={{
+                valueContainer: (p) => {
+                  return {
+                    ...p,
+                    color: "white",
+                    background: "black",
+                  };
+                },
+                control: (p) => {
+                  return {
+                    ...p,
+                    float: "left",
+                    marginBottom: 2,
+                    width: 250,
+                    color: "white",
+                    background: "black",
+                    borderRadius: 0,
+                  };
+                },
+                menu: (p) => {
+                  return {
+                    ...p,
+                    width: 250,
+                    color: "white",
+                    background: "black",
+                    borderRadius: 0,
+                  };
+                },
+                option: (p, state) => {
+                  return {
+                    ...p,
+                    width: 250,
+                    color: state.isFocused ? "black" : "white",
+                    background: state.isFocused ? "deeppink" : "black",
+                    borderRadius: 0,
+                  };
+                },
+                container: (p) => {
+                  return {
+                    ...p,
+                    color: "white",
+                    background: "black",
+                  };
+                },
+                input: (p) => {
+                  return {
+                    ...p,
+                    color: "white",
+                    background: "black",
+                  };
+                },
+              }}
+            />
             <AddLocalTime
               now={now}
               timezones={timezones}
-              addTimezone={this.addTimezone}
+              addTimezone={addTimezone}
             />
           </Header>
 
           <Timetable
             now={now}
             timezones={timezones}
-            removeTimezone={this.removeTimezone}
-            moveUp={this.moveTimezoneUp}
-            moveDown={this.moveTimezoneDown}
+            removeTimezone={removeTimezone}
+            moveUp={moveTimezoneUp}
+            moveDown={moveTimezoneDown}
           />
         </Body>
       </Page>
