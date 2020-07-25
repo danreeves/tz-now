@@ -97,11 +97,32 @@ export class App extends React.Component {
     });
   };
 
-  moveTimezone = (timezone, change) => {
-    this.setState(prevState => {
-      const timezones = [...prevState.timezones];
-    });
+  moveTimezone = (timezone, direction) => {
+	const index = this.state.timezones.indexOf(timezone)
+	const before = this.state.timezones.slice(0, index)
+	const after = this.state.timezones.slice(index + 1, this.state.timezones.length)
+
+	if (direction === "up") {
+	  const displaced = before.pop()
+	  this.setState({
+		timezones: [...before, timezone, displaced, ...after]
+	  })
+	}
+	if (directions === "down") {
+	  const displaced = after.shift()
+	  this.setState({
+		timezones: [...before, displaced, timezone, ...after]
+	  })
+	}
   };
+
+  moveTimezoneUp = (timezone) => {
+	this.moveTimezone(timezone, "up")
+  }
+
+  moveTimezoneDown = (timezone) => {
+	this.moveTimezone(timezone, "down")
+  }
 
   render() {
     const { now, timezones, tzIds } = this.state;
